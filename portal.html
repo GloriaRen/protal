@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div>
+      <form
+        action="http://127.0.0.1:3000/file"
+        enctype="multipart/form-data"
+        method="post"
+      >
+        <input type="file" value="上传" name="file" />
+        <input type="submit" value="提交" />
+      </form>
+    </div>
+    <div>
+      <button onclick="getVersion()">获取版本信息</button>
+      <ul>
+        <li id="versionList"></li>
+      </ul>
+    </div>
+
+    <script>
+      function getVersion() {
+        axios
+          .get('http://127.0.0.1:3000/version', {})
+          .then(response => {
+            document.getElementById('versionList').html = response
+          })
+          .catch(error => {
+            console.log(error)
+          })
+      }
+    </script>
+  </body>
+</html>

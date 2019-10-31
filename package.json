@@ -1,0 +1,27 @@
+{
+  "name": "portal",
+  "version": "1.0.0",
+  "description": "Cloud platform subproject version monitoring",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node src/service/api.js",
+    "update": "node src/routes/update.js",
+    "api": "node src/service/api.js"
+  },
+  "keywords": [
+    "11211-use"
+  ],
+  "author": "ex_renrr",
+  "license": "ISC",
+  "devDependencies": {
+    "koa": "^2.11.0",
+    "koa-body": "^4.1.1",
+    "koa-router": "^7.4.0"
+  },
+  "dependencies": {
+    "koa-static": "^5.0.0",
+    "node-static": "^0.7.11",
+    "static": "^2.0.0"
+  }
+}
