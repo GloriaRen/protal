@@ -15,7 +15,6 @@ app.use(async (ctx, next) => {
     'x-requested-with, accept, origin, content-type'
   )
   // 服务器收到请求以后，检查了Origin、Access-Control-Request-Method和Access-Control-Request-Headers字段以后，确认允许跨源请求，就可以做出回应。
-  // Content-Type表示具体请求中的媒体类型信息
   ctx.set('Content-Type', 'application/json;charset=utf-8')
   // 当设置成允许请求携带cookie时，需要保证"Access-Control-Allow-Origin"是服务器有的域名，而不能是"*";
   ctx.set('Access-Control-Allow-Credentials', true)
@@ -48,19 +47,6 @@ app.use(
 )
 
 // 上传json文件
-// router.post('/file', async (ctx, next) => {
-//   const file = ctx.request.files.file
-//   console.log(file)
-//   const path = ctx.createReadStream(file.path) //获取上传文件
-//   // 创建可读流
-//   const reader = fs.createReadStream(file.path)
-//   let filePath = path.join(__dirname, 'public/') + `/${file.name}`
-//   // 创建可写流
-//   const writeStream = fs.createWriteStream(filePath)
-//   // 可读流通过管道写入可写流
-//   reader.pipe(writeStream)
-//   return (ctx.body = '上传成功！')
-// })
 const uploadUrl = 'http://localhost:3000/file'
 router.post('/file', ctx => {
   const file = ctx.request.files.file
