@@ -1,11 +1,23 @@
 const Koa = require('koa')
 const fs = require('fs')
 const path = require('path')
+const views = require('koa-views')
 const router = require('koa-router')()
 const koaBody = require('koa-body')
 const static = require('koa-static')
-const version = require('../static/version')
+// const version = require('static/version')
 const app = new Koa()
+
+// 加载模板引擎
+app.use(views(path.join(__dirname, 'src/static'), {}))
+
+app.use(static(__dirname + 'src/static'))
+router.get('/', async ctx => {
+  let title = 'MideaCloud'
+  await ctx.render('index', {
+    title
+  })
+})
 
 app.use(async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin', '*')
@@ -20,18 +32,6 @@ app.use(async (ctx, next) => {
   ctx.set('Access-Control-Allow-Credentials', true)
   // 该字段可选，用来指定本次预检请求的有效期，单位为秒。
   ctx.set('Access-Control-Max-Age', 300)
-
-  /*
-  CORS请求时，XMLHttpRequest对象的getResponseHeader()方法只能拿到6个基本字段：
-      Cache-Control、
-      Content-Language、
-      Content-Type、
-      Expires、
-      Last-Modified、
-      Pragma。
-  */
-  // 需要获取其他字段时，使用Access-Control-Expose-Headers，
-  // getResponseHeader('myData')可以返回我们所需的值
   ctx.set('Access-Control-Expose-Headers', 'myData')
   await next()
 })
@@ -49,19 +49,19 @@ app.use(
 // 上传json文件
 const uploadUrl = 'http://localhost:3000/file'
 router.post('/file', ctx => {
+  console.log(ctx.request)
   const file = ctx.request.files.file
+  console.log(file)
   // 读取文件流
   const fileReader = fs.createReadStream(file.path)
-  const filePath = path.join(__dirname, '../static/')
+  const filePath = path.join(__dirname, 'src/static/')
   // 组装成绝对路径
   const fileResource = filePath + `/${file.name}`
-
-  /*
-   使用 createWriteStream 写入数据，然后使用管道流pipe拼接
-  */
+  // 使用 createWriteStream 写入数据，然后使用管道流pipe拼接
   const writeStream = fs.createWriteStream(fileResource)
-  // 判断 /static/upload 文件夹是否存在，如果不在的话就创建一个
+  // 判断 /static/ 文件夹是否存在，如果不在的话就创建一个
   if (!fs.existsSync(filePath)) {
+    console.log('001')
     fs.mkdir(filePath, err => {
       if (err) {
         throw new Error(err)
@@ -75,6 +75,7 @@ router.post('/file', ctx => {
       }
     })
   } else {
+    console.log('002')
     fileReader.pipe(writeStream)
     ctx.body = {
       url: uploadUrl + `/${file.name}`,
@@ -85,7 +86,7 @@ router.post('/file', ctx => {
 })
 
 // 获取版本信息
-router.get('/version', async (ctx, next) => {
+router.get('/list', async (ctx, next) => {
   ctx.response.body = {
     code: 200,
     status: true,

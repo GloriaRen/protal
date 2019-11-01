@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="file" id="uploadFile" onchange="uploadImage()" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script>
+      function uploadImage() {
+        var fd = new FormData()
+        fd.append('file', document.getElementById('uploadFile').files[0])
+        // 如果还想传一些参数，可以继续使用fd.append("filename", "自定义文件名");
+        axios({
+          method: 'POST',
+          url: 'http://localhost:3000/file',
+          data: fd,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          // 添加上传进度
+          onUploadProgress: function(e) {
+            var percentage = Math.round((e.loaded * 100) / e.total) || 0
+            if (percentage < 100) {
+              console.log(percentage + '%') // 上传进度
+            }
+          }
+        })
+          .then(resp => {
+            console.log(resp.data)
+          })
+          .catch(err => console.log(err))
+      }
+    </script>
+  </body>
+</html>

@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
+    <title>MideaCloud</title>
+    <link rel="stylesheet" href="" />
+    <link rel="stylesheet" href="" />
+    <script src="$$"></script>
+    <script src=""></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
   <body>
@@ -26,9 +30,12 @@
     </div>
 
     <script>
+      // 渲染项目配置json文件里的数据到DOM
+      function renderHtml() {}
+
       function getVersion() {
         axios
-          .get('http://127.0.0.1:3000/version', {})
+          .get('http://127.0.0.1:3000/list', {})
           .then(response => {
             document.getElementById('versionList').html = response
           })
