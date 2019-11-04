@@ -1,17 +1,19 @@
 const Koa = require('koa')
-const fs = require('fs')
 const path = require('path')
+const multer = require('koa-multer')
 const views = require('koa-views')
 const router = require('koa-router')()
 const koaBody = require('koa-body')
 const static = require('koa-static')
-// const version = require('static/version')
 const app = new Koa()
 
 // 加载模板引擎
-app.use(views(path.join(__dirname, 'src/static'), {}))
+app.use(
+  views(path.join(__dirname, 'src/views'), {
+    extension: 'ejs'
+  })
+)
 
-app.use(static(__dirname + 'src/static'))
 router.get('/', async ctx => {
   let title = 'MideaCloud'
   await ctx.render('index', {
@@ -36,57 +38,67 @@ app.use(async (ctx, next) => {
   await next()
 })
 
-app.use(
-  koaBody({
-    multipart: true,
-    formidable: {
-      maxFileSize: 200 * 1024 * 1024 // 设置上传文件大小最大限制，默认2M
-    },
-    keepExtensions: true //保留文件后缀
-  })
-)
-
-// 上传json文件
-const uploadUrl = 'http://localhost:3000/file'
-router.post('/file', ctx => {
-  console.log(ctx.request)
-  const file = ctx.request.files.file
-  console.log(file)
-  // 读取文件流
-  const fileReader = fs.createReadStream(file.path)
-  const filePath = path.join(__dirname, 'src/static/')
-  // 组装成绝对路径
-  const fileResource = filePath + `/${file.name}`
-  // 使用 createWriteStream 写入数据，然后使用管道流pipe拼接
-  const writeStream = fs.createWriteStream(fileResource)
-  // 判断 /static/ 文件夹是否存在，如果不在的话就创建一个
-  if (!fs.existsSync(filePath)) {
-    console.log('001')
-    fs.mkdir(filePath, err => {
-      if (err) {
-        throw new Error(err)
-      } else {
-        fileReader.pipe(writeStream)
-        ctx.body = {
-          url: uploadUrl + `/${file.name}`,
-          code: 200,
-          message: '上传成功'
-        }
-      }
-    })
-  } else {
-    console.log('002')
-    fileReader.pipe(writeStream)
-    ctx.body = {
-      url: uploadUrl + `/${file.name}`,
-      code: 0,
-      message: '上传成功'
-    }
+//文件上传
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'src/static/')
+  },
+  //修改文件名称
+  filename: function(req, file, cb) {
+    var fileFormat = file.originalname.split('.') //以点分割成数组，数组的最后一项就是后缀名
+    cb(null, Date.now() + '.' + fileFormat[fileFormat.length - 1])
+  }
+})
+//加载配置
+var upload = multer({ storage: storage })
+router.post('/upload', upload.single('file'), async (ctx, next) => {
+  console.log(ctx.req.file)
+  ctx.body = {
+    filename: ctx.req.file.filename //返回文件名
   }
 })
 
+// 上传json文件
+// const uploadUrl = 'http://localhost:3000/file'
+// router.post('/file', ctx => {
+//   console.log(ctx.request)
+//   const file = ctx.request.files.file
+//   console.log(file)
+//   // 读取文件流
+//   const fileReader = fs.createReadStream(file.path)
+//   const filePath = path.join(__dirname, 'src/static/')
+//   // 组装成绝对路径
+//   const fileResource = filePath + `/${file.name}`
+//   // 使用 createWriteStream 写入数据，然后使用管道流pipe拼接
+//   const writeStream = fs.createWriteStream(fileResource)
+//   // 判断 /static/ 文件夹是否存在，如果不在的话就创建一个
+//   if (!fs.existsSync(filePath)) {
+//     console.log('001')
+//     fs.mkdir(filePath, err => {
+//       if (err) {
+//         throw new Error(err)
+//       } else {
+//         fileReader.pipe(writeStream)
+//         ctx.body = {
+//           url: uploadUrl + `/${file.name}`,
+//           code: 200,
+//           message: '上传成功'
+//         }
+//       }
+//     })
+//   } else {
+//     console.log('002')
+//     fileReader.pipe(writeStream)
+//     ctx.body = {
+//       url: uploadUrl + `/${file.name}`,
+//       code: 0,
+//       message: '上传成功'
+//     }
+//   }
+// })
+
 // 获取版本信息
-router.get('/list', async (ctx, next) => {
+router.get('/versionList', async (ctx, next) => {
   ctx.response.body = {
     code: 200,
     status: true,
@@ -97,11 +109,10 @@ router.get('/list', async (ctx, next) => {
 
 // 回滚版本
 
-app.use(static(path.join(__dirname)))
-// add router middleware:
+// app.use(static(path.join(__dirname)))
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-app.listen(3000, () => {
-  console.log('app started at port 3000...')
+app.listen(3022, () => {
+  console.log('app started at port 3022...')
 })
